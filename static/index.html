@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALUĒUR | Intelligent Automotive Valuation</title>
+    <meta name="description" content="ML-powered used car price prediction — XGBoost regression with 97% R² on Indian market data.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="ambient-bg">
+        <div class="bg-grid"></div>
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
+    <header>
+        <a href="#" class="logo">Valuēur <span class="logo-dot"></span></a>
+        <nav>
+            <a href="#calculator">Valuation</a>
+            <a href="#methodology">Approach</a>
+            <a href="#insights">Model Analysis</a>
+            <a href="#calculator" class="btn-nav">Appraise</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <svg class="hero-lines" viewBox="0 0 180 320" aria-hidden="true">
+            <path d="M20 10 Q90 80 40 160 T60 310"/>
+            <path d="M80 0 Q120 100 70 200 T100 320"/>
+            <path d="M140 30 Q160 120 110 220 T150 300"/>
+        </svg>
+
+        <div class="hero-inner">
+            <div class="reveal">
+                <div class="hero-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Portfolio Project · ML Regression
+                </div>
+                <h1>Precision Resale Valuation<br>For <em>Indian Market Data</em></h1>
+                <p class="hero-lead">A gradient-boosted regression pipeline trained on 450+ vehicle records. Enter specifications to receive a data-driven resale estimate in lakhs — powered by a live Flask API.</p>
+            </div>
+
+            <div class="hero-stats reveal reveal-delay-1">
+                <div class="stat-item">
+                    <span class="stat-label">Test R² Score</span>
+                    <span class="stat-value"><span id="statR2">—</span><small>%</small></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Mean Abs. Error</span>
+                    <span class="stat-value"><span id="statMae">—</span><small> lakhs</small></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Classifier Accuracy</span>
+                    <span class="stat-value"><span id="statAcc">—</span><small>%</small></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Best Model</span>
+                    <span class="stat-value" style="font-size:1.35rem" id="statModel">XGBoost</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="app-container" id="calculator">
+        <div class="valuation-card reveal">
+            <div class="card-header">
+                <h2>Vehicle Configuration</h2>
+                <p>Fields mapped to the trained feature vector — same inputs the model expects at inference</p>
+            </div>
+
+            <form id="valuationForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="field-label" for="brand">Model / Brand</label>
+                        <select id="brand" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="field-label" for="year">Model Year</label>
+                        <select id="year" required></select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="range-header">
+                            <label class="field-label" for="presentPrice">Ex-Showroom Price</label>
+                            <span class="range-value" id="presentPriceVal">₹ 9.50 Lakhs</span>
+                        </div>
+                        <input type="range" id="presentPrice" min="1" max="35" step="0.25" value="9.5">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="range-header">
+                            <label class="field-label" for="kmsDriven">Odometer Reading</label>
+                            <span class="range-value" id="kmsVal">45,000 km</span>
+                        </div>
+                        <input type="range" id="kmsDriven" min="1000" max="180000" step="2500" value="45000">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="field-label">Fuel Type</label>
+                        <div class="segmented-control">
+                            <div class="segmented-option">
+                                <input type="radio" id="fuelPetrol" name="fuel" value="Petrol" checked>
+                                <label for="fuelPetrol">Petrol</label>
+                            </div>
+                            <div class="segmented-option">
+                                <input type="radio" id="fuelDiesel" name="fuel" value="Diesel">
+                                <label for="fuelDiesel">Diesel</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="field-label">Transmission</label>
+                        <div class="segmented-control">
+                            <div class="segmented-option">
+                                <input type="radio" id="transManual" name="transmission" value="Manual" checked>
+                                <label for="transManual">Manual</label>
+                            </div>
+                            <div class="segmented-option">
+                                <input type="radio" id="transAuto" name="transmission" value="Automatic">
+                                <label for="transAuto">Automatic</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="field-label">Seller Channel</label>
+                        <div class="segmented-control">
+                            <div class="segmented-option">
+                                <input type="radio" id="sellerDealer" name="seller" value="Dealer" checked>
+                                <label for="sellerDealer">Dealer</label>
+                            </div>
+                            <div class="segmented-option">
+                                <input type="radio" id="sellerInd" name="seller" value="Individual">
+                                <label for="sellerInd">Direct</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="error-msg" id="errorMsg"></p>
+
+                <button type="submit" class="btn-calculate" id="btnCalc">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Compute Valuation
+                </button>
+            </form>
+        </div>
+
+        <div class="result-panel" id="resultPanel">
+            <div>
+                <div class="result-header">
+                    <div class="result-label">Estimated Fair Market Price</div>
+                    <div class="price-display">₹ <span id="outPriceNum">—</span> <span class="unit">Lakhs</span></div>
+                    <span class="tier-badge tier-mid" id="outTier">Mid-Range Tier</span>
+                </div>
+
+                <div class="analytics-block">
+                    <div class="metric-row">
+                        <span class="metric-title">Retained Value</span>
+                        <span class="metric-value" id="outRetention">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-title">Annual Depreciation</span>
+                        <span class="metric-value" id="outDeprec">—</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-title">Market Liquidity</span>
+                        <span class="metric-value" id="outLiquidity">—</span>
+                    </div>
+
+                    <div style="margin-top:1.25rem">
+                        <div class="metric-row" style="margin-bottom:4px">
+                            <span class="metric-title" style="font-size:0.75rem">Price Index Spectrum</span>
+                        </div>
+                        <div class="meter-bar-bg">
+                            <div class="meter-bar-fill" id="meterFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="confidence-note">
+                <span class="confidence-icon"></span>
+                Live inference via XGBoost · trained on augmented Indian car dataset
+            </div>
+        </div>
+    </section>
+
+    <section class="insights-section" id="methodology">
+        <div class="section-header centered reveal">
+            <span class="section-eyebrow">Methodology</span>
+            <h2>Built on Real Market Signals</h2>
+            <p>Five regressors and two classifiers compared with 5-fold cross-validation. XGBoost won on test R²; logistic regression led on price-tier classification.</p>
+        </div>
+
+        <div class="grid-3">
+            <div class="feature-card reveal">
+                <div class="feature-num">01</div>
+                <h3>Feature Engineering</h3>
+                <p>Car age derived from year, one-hot encoded brands (top 10 + other), fuel, transmission, and seller type — 18 features total.</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-1">
+                <div class="feature-num">02</div>
+                <h3>Model Selection</h3>
+                <p>Randomized search over 15 XGBoost configurations. Polynomial Ridge and baseline linear models kept as benchmarks.</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-2">
+                <div class="feature-num">03</div>
+                <h3>Dual Output</h3>
+                <p>Regression predicts exact price in lakhs. Classification buckets into Budget, Mid-Range, and Premium tiers via train-set quantiles.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="insights-section" id="insights">
+        <div class="section-header reveal">
+            <span class="section-eyebrow">Model Analysis</span>
+            <h2>Evaluation Visualizations</h2>
+            <p>Generated during training — click any chart to expand.</p>
+        </div>
+
+        <div class="gallery-grid">
+            <div class="gallery-item reveal">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot1_actual_vs_predicted.png" alt="Actual vs predicted selling price scatter plot" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>Actual vs Predicted</h4>
+                    <p>XGBoost regressor — tight clustering along the ideal line</p>
+                </div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-1">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot2_regression_comparison.png" alt="Regression model R2 comparison chart" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>Model Comparison</h4>
+                    <p>Test R² vs 5-fold cross-validated R² across five regressors</p>
+                </div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-2">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot3_feature_importances.png" alt="Top feature importances bar chart" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>Feature Importance</h4>
+                    <p>Present price, diesel fuel, and car age dominate</p>
+                </div>
+            </div>
+            <div class="gallery-item reveal">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot4_confusion_matrix.png" alt="Confusion matrix for price tier classification" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>Confusion Matrix</h4>
+                    <p>92% accuracy on Budget / Mid-Range / Premium tiers</p>
+                </div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-1">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot5_roc_logistic_regression.png" alt="ROC curve for logistic regression classifier" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>ROC — Logistic Regression</h4>
+                    <p>Macro AUC 0.97 across price brackets</p>
+                </div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-2">
+                <div class="gallery-img-wrap">
+                    <span class="gallery-shimmer" aria-hidden="true"></span>
+                    <img src="/static/images/plot6_roc_xgboost.png" alt="ROC curve for XGBoost classifier" loading="lazy">
+                </div>
+                <div class="gallery-caption">
+                    <h4>ROC — XGBoost Classifier</h4>
+                    <p>One-vs-rest curves for tier prediction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="logo" style="font-size:1.2rem">Valuēur <span class="logo-dot"></span></div>
+        <div class="footer-text">Portfolio project · Flask + scikit-learn + XGBoost</div>
+        <div class="footer-links">
+            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            <a href="#calculator">Try the API</a>
+        </div>
+    </footer>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-label="Chart preview">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+        <img id="lightboxImg" src="" alt="">
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
