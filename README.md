@@ -70,8 +70,8 @@ The frontend and backend are served from the same Flask app (same-origin), so th
 
 ```bash
 pip install -r requirements.txt
-python train_model.py   # trains all models, saves the best one + metadata
-python app.py            # starts the server
+py train_model.py   # trains all models, saves the best one + metadata
+py app.py            # starts the server
 ```
 Then open `http://127.0.0.1:5000`.
 
