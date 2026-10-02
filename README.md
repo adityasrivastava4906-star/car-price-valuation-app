@@ -4,7 +4,7 @@ A full-stack machine learning web app that predicts used car resale prices in In
 
 ## Live Demo
 
-🔗 *[Add your Render URL here once deployed]*
+🔗 **[Live Demo](https://car-price-valuation-app.onrender.com)**
 
 ## What It Does
 
